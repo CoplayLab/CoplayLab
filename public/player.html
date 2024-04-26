@@ -1,0 +1,123 @@
+<!-- player.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <div class="container">
+        <button id="results">Back to search</button>
+        <div id="player"></div>
+    </div>
+
+    <script src="https://play.workadventu.re/iframe_api.js"></script>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('query');
+
+        WA.state.query = query;
+
+        const searchPageUrl = `search.html?q=${query}`;
+        resultsButton = document.getElementById('results');
+        resultsButton.addEventListener('click', backToResults);
+
+        function backToResults() {
+            WA.state.video = searchPageUrl;
+            WA.room.website.delete("reaction");
+            document.location.href = searchPageUrl;
+        }
+
+        WA.state.onVariableChange('video').subscribe((value) => {
+            if (value == searchPageUrl) {
+                document.location.href = searchPageUrl;
+            }
+        })
+        const videoId = urlParams.get('videoId');
+
+        var tag = document.createElement('script');
+
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var youtube;
+        function onYouTubeIframeAPIReady() {
+            youtube = new YT.Player('player', {
+                height: '546',
+                width: '896',
+                videoId: videoId,
+                playerVars: {
+                    'playsinline': 0
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            drawbar = WA.room.website.create({
+                name: "reaction",
+                url: "./reaction.html",
+                position: {
+                    x: 189.64,
+                    y: 350.45,
+                    height: 38.82,
+                    width: 403.18,
+                },
+                allowApi: true,
+                scale: 0.5,
+                });
+        }
+
+        var done = false;
+
+        var previousTimecode = 0;
+        var currentTimecode = 0;
+
+        function onPlayerStateChange(event) {
+            WA.state.videoState = event.data;
+            currentTimecode = youtube.getCurrentTime();
+            console.log(currentTimecode - previousTimecode);
+            // Perform comparison between previous and current timecodes
+            if ((currentTimecode - previousTimecode) >= .5 || (currentTimecode - previousTimecode) <= -.5) {
+                if (currentTimecode > previousTimecode) {
+                    console.log("User scrubbed forward");
+                } else if (currentTimecode < previousTimecode) {
+                    console.log("User scrubbed backward");
+                }
+                previousTimecode = currentTimecode;
+                WA.state.videoTime = currentTimecode;
+            }
+        }
+
+        function stopVideo() {
+            youtube.stopVideo();
+        }
+        WA.state.onVariableChange('videoState').subscribe((value) => {
+            if (value == 1) {
+                youtube.playVideo();
+            }
+            if (value == 2) {
+                youtube.pauseVideo();
+            }
+        })
+        WA.state.onVariableChange('videoTime').subscribe((value) => {
+            if (event.data !== YT.PlayerState.BUFFERING) {
+                youtube.seekTo(value, true);
+                onPlayerReady;
+            }
+        })
+            
+    </script>
+</body>
+
+</html>

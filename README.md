@@ -1,55 +1,37 @@
-# WorkAdventure Map Starter Kit
+# CoplayLab
 
-![map](./map.png)
+### Nom des développeurs et des fonctionnalitées développées
 
-This is a starter kit to help you build your own map for [WorkAdventure](https://workadventu.re).
+Sami ASSIAKH
+GitHub : iSaaMz - https://github.com/iSaaMz
+Fonctionnalitées développées :
+- Téléportation d'un joueur spécifique sur une autre map (exclusion d'un joueur)
+- Système de sondage interactif pour les utilisateurs (création, diffusion et participation du sondage, affichage des résultats)
 
-To understand how to use this starter kit, follow the tutorial at [https://workadventu.re/map-building](https://workadventu.re/map-building).
+Jay BURY
+GitHub : buryj97 - https://github.com/buryj97
+Fonctionnalitées développées :
+-
 
-## Structure
-* *public*: Static files like PDFs or audio files
-* *src*: Scripts files
-* *tilesets*: All tilesets
-* *map.tmj*: Map file
-* *map.png*: The map thumbnail displayed on the in-game map information
+Clement YVARS
+GitHub : clement-Yvars - https://github.com/clement-Yvars
+Fonctionnalitées développées :
+-
 
-If you want to use more than one map file, just add the new map file on root or in a folder.
 
-we recommend using 500x500 images for the map thumbnails.
+Moussa Seydou TRAORE
+GitHub : MoussaST - https://github.com/MoussaST
+Fonctionnalitées développées :
+- Animation de l'écran d'accueil 
+- Barre de réaction dynamique avec effet sonore
 
-If you are going to create custom websites to embed in the map, please reference the HTML files in the `input` option in *vite.config.js*.
+### Procédure d’installation et de lancement du projet
 
-## Requirements
+Pour installer et lancer le projet, suivez les étapes suivantes :
 
-Node.js version >=17
+1. Installez les dépendances du projet avec la commande : `npm install`
+2. Lancez le serveur local avec la commande : `npm run dev`
+3. Naviguez à l'adresse : `http://localhost:5173/` pour accèder à Workadventure et accèder à la map
 
-## Installation
+Afin de modifier les maps, téléchargez Tiled sur l'adresse suivante `https://www.mapeditor.org/`, puis lancez la commande suivante : `tiled nom_de_la_map.tmj`
 
-With npm installed (comes with [node](https://nodejs.org/en/)), run the following commands into a terminal in the root directory of this project:
-
-```shell
-npm install
-npm run dev
-```
-
-## Test production map
-
-You can test the optimized map as it will be in production:
-```sh
-npm run build
-npm run prod
-```
-
-## Licenses
-
-This project contains multiple licenses as follows:
-
-* [Code license](./LICENSE.code) *(all files except those for other licenses)*
-* [Map license](./LICENSE.map) *(`map.tmj` and the map visual as well)*
-* [Assets license](./LICENSE.assets) *(the files inside the `src/assets/` folder)*
-
-### About third party assets
-
-If you add third party assets in your map, do not forget to:
-1. Credit the author and license with the "tilesetCopyright" property present in the properties of each tilesets in the `map.tmj` file
-2. Add the license text in LICENSE.assets
