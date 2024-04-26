@@ -1,6 +1,6 @@
 name: Optimize map and deploy
 
-on: [ push ]
+on: [push]
 
 permissions:
   contents: write
@@ -17,8 +17,8 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
 
       - name: "Install dependencies"
         run: npm install
@@ -33,7 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
           FOLDER: dist/ # The folder the action should deploy.
-          BASE_BRANCH: master
+          BASE_BRANCH: main
 
       - name: Bash2
         run: |
