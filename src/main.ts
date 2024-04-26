@@ -1,7 +1,6 @@
 /// <reference types="@workadventure/iframe-api-typings" />
 
 let currentPopup: any = undefined;
-let config = WA.state.loadVariable("config");
 import { reactions } from "./constants";
 
 // Waiting for the API to be ready
@@ -14,8 +13,6 @@ WA.onInit().then(() => {
 
   WA.room.area.onLeave("clock").subscribe(closePopup);
 
-  let searchWebsite: any;
-  let drawbar: any;
   WA.state
     .saveVariable("reactions", reactions)
     .catch((e: any) =>
@@ -24,7 +21,7 @@ WA.onInit().then(() => {
 
   WA.room.area.onEnter("cinema").subscribe(() => {
     console.log("enter area");
-    searchWebsite = WA.room.website.create({
+    WA.room.website.create({
       name: "player",
       url: "./search.html",
       position: {
