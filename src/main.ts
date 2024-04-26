@@ -21,7 +21,7 @@ WA.onInit().then(() => {
 
   WA.room.area.onEnter("cinema").subscribe(() => {
     console.log("enter area");
-    searchWebsite = WA.room.website.create({
+    WA.room.website.create({
       name: "player",
       url: "./search.html",
       position: {
