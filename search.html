@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youtube Search</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <div class="container">
+        <img src="images/logo_coplaylab.png" class="logo">
+        <h1>Search on Youtube</h1>
+        <input type="text" id="searchBar" placeholder="Search Youtube" />
+        <button class="btn" onclick="checkSharedState()">Search</button>
+        <button class="btn" id="adminPollButton" onclick="openPollForm()">Start Poll</button>
+        <div id="results-container"></div>
+        <button class="hidden btn-outline" onclick="loadMore()" id="loadButton">Load More</button>
+    </div>
+
+    <div id="pollForm" class="hidden">
+        <button class="close-button" onclick="closePoll()">&times;</button>
+
+        <h2>What video should we watch next?</h2>
+        <p class="subtitle"><small>The results will be displayed after 10 seconds.</small></p>
+        <input type="text" id="option1" placeholder="Option 1" />
+        <input type="text" id="option2" placeholder="Option 2" />
+        <input type="text" id="option3" placeholder="Option 3" />
+        <input type="text" id="option4" placeholder="Option 4" />
+        <button class="btn-submit" onclick="submitPoll()">Submit Poll</button>
+    </div>
+    <p id="countdown"></p>
+
+
+
+
+
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://play.workadventu.re/iframe_api.js"></script>
+
+    <script>
+
+        /// <reference types="@workadventure/iframe-api-typings" />
+
+        var nextPageToken = '';
+        var lastVideoState = '';
+        var currentVideoState = '';
+
+        WA.state.onVariableChange('video').subscribe((value) => {
+            displayResults(value);
+        })
+
+        function checkSharedState() {
+            const searchBar = document.getElementById('searchBar');
+            var q = searchBar.value;
+
+            currentVideoState = q;
+            WA.state.query = currentVideoState;
+
+            if (currentVideoState !== lastVideoState) {
+
+                lastVideoState = currentVideoState;
+                searchYouTube(currentVideoState);
+
+            }
+        }
+
+        function initClient() {
+            return gapi.client.init({
+                apiKey: 'AIzaSyBbzOMs1balcnczYjjOPYpOcJ2qmIX5K9A',
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"],
+            });
+        }
+
+        function searchYouTube(currentVideoState) {
+            gapi.client.youtube.search.list({
+                "part": [
+                    "snippet"
+                ],
+                "maxResults": 10,
+                "q": currentVideoState,
+                "pageToken": nextPageToken,
+                'type': 'video',
+            })
+                .then(function (response) {
+                    WA.state.video = response.result.items;
+                    nextPageToken = response.result.nextPageToken;
+                    console.log(response);
+                    displayResults(response.result.items);
+
+                },
+                    function (err) { console.error("Execute error", err); });
+        }
+        function displayResults(items) {
+            var resultsContainer = document.getElementById('results-container');
+            resultsContainer.classList.add('grid-container');
+            resultsContainer.innerHTML = '';
+
+            if (typeof items == 'object') {
+                items.forEach(function (item) {
+                    var videoTitle = item.snippet.title;
+                    var videoId = item.id.videoId;
+                    var videoThumbnail = item.snippet.thumbnails.high.url;
+                    var videoChannel = item.snippet.channelTitle;
+                    var videoElement = document.createElement('div');
+
+                    videoElement.classList.add('video-container');
+
+                    var embedUrl = getEmbedUrl(item);
+
+                    videoElement.innerHTML = `
+                <a href="player.html?videoId=${videoId}&query=${WA.state.query}">
+                    <img class="video-thumbnail" src="${videoThumbnail}" alt="${videoTitle}">
+                    <p class="video-title">${videoTitle}</p>
+                    <small class="channel">${videoChannel}</small>
+                </a>
+            `;
+                    document.getElementById('loadButton').classList.remove('hidden');
+                    videoElement.addEventListener('click', function () {
+                        WA.state.video = `player.html?videoId=${videoId}&query=${WA.state.query}`
+
+                    })
+
+                    resultsContainer.appendChild(videoElement);
+                });
+            } else if (typeof items == 'string') {
+                document.location.href = items;
+            }
+
+            function getEmbedUrl(data) {
+                const videoId = data.id.videoId;
+                const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                return embedUrl;
+            }
+        }
+
+        function loadMore() {
+            searchYouTube(currentVideoState);
+            var resultsContainer = document.getElementById('results-container');
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        gapi.load('client', function () {
+            gapi.client.init({
+                apiKey: 'AIzaSyBbzOMs1balcnczYjjOPYpOcJ2qmIX5K9A',
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"],
+            }).then(function () {
+                console.log("GAPI client loaded for API");
+            }, function (err) {
+                console.error("Error loading GAPI client for API", err);
+            });
+        });
+        const poll = document.getElementById('pollForm');
+        function openPollForm() {
+            poll.classList.remove('hidden');
+            resetVotes();
+        }
+
+        function closePoll() {
+            poll.classList.add('hidden');
+        }
+
+        function submitPoll() {
+            const options = {
+                option1: document.getElementById('option1').value,
+                option2: document.getElementById('option2').value,
+                option3: document.getElementById('option3').value,
+                option4: document.getElementById('option4').value,
+            };
+            WA.state.saveVariable('pollOptions', JSON.stringify(options)).catch(e => console.error('Something went wrong while saving variable', e));
+            document.getElementById('pollForm').classList.add('hidden');
+
+            WA.event.broadcast('poll-event', JSON.stringify(options));
+        }
+
+
+        WA.onInit().then(() => {
+            WA.event.on('poll-event').subscribe((event) => {
+                const options = JSON.parse(event.data);
+                openPollForAll(options);
+            });
+        });
+        var pollPopup;
+        function openPollForAll(pollOptions) {
+            let buttons = Object.keys(pollOptions).map(key => ({
+                label: pollOptions[key],
+                className: 'primary',
+                callback: (popup) => {
+                    vote(pollOptions[key]);
+                    popup.close();
+                }
+            }));
+            pollPopup = WA.ui.openPopup("pollPopup", "What video should we watch?", buttons);
+            displayVotes();
+        }
+
+        function vote(option) {
+            let votes = JSON.parse(WA.state.loadVariable('votes') || '{}');
+            votes[option] = (votes[option] || 0) + 1;
+            WA.state.saveVariable('votes', JSON.stringify(votes))
+                // .then(() => displayVotes())
+                .catch(e => console.error('Error saving votes', e));
+        }
+
+
+        function displayVotes() {
+            let countdown = 15; // Set the countdown timer to 10 seconds
+            const countdownInterval = setInterval(() => {
+                countdown--; // Decrement countdown every second
+                countdownHtml = `Collecting votes: ${countdown} seconds remaining`;
+                document.getElementById('countdown').innerHTML = countdownHtml;
+                if (countdown <= 0) {
+                    document.getElementById('countdown').innerHTML = '';
+                    clearInterval(countdownInterval); // Stop the countdown
+                    pollPopup.close();
+                    showResults(); // Call the function to display the results
+                }
+            }, 1000); // Update the countdown every second
+
+            function showResults() {
+                const votes = JSON.parse(WA.state.loadVariable('votes'));
+                let resultsHtml = "Winner\n";
+                Object.keys(votes).forEach(option => {
+                    resultsHtml += `${option}: ${votes[option]} votes `;
+                });
+                console.log('open popup 2');
+                const resultsPopup = WA.ui.openPopup("resultsPopup", resultsHtml, [{
+                    label: "Close",
+                    className: "primary",
+                    callback: (popup) => {
+                        console.log('click');
+                        popup.close();
+                    }
+                }]);
+                setTimeout(() => { resultsPopup.close(); }, 5000);
+                console.log('close results popup');
+            }
+        }
+
+
+        function resetVotes() {
+            let votes = {};
+            WA.state.saveVariable('votes', JSON.stringify(votes))
+                .then(() => console.log('Votes reset successfully'))
+                .catch(e => console.error('Error resetting votes', e));
+            document.getElementById('option1').value = '';
+            document.getElementById('option2').value = '';
+            document.getElementById('option3').value = '';
+            document.getElementById('option4').value = '';
+        }
+
+
+    </script>
+</body>
+
+</html>
