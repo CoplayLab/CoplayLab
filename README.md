@@ -11,7 +11,7 @@ Fonctionnalitées développées :
 Jay BURY
 GitHub : buryj97 - https://github.com/buryj97
 Fonctionnalitées développées :
--
+  - Recherche et lancement des vidéos avec l'API Youtube
 
 Clement YVARS
 GitHub : clement-Yvars - https://github.com/clement-Yvars
