@@ -44,6 +44,9 @@ export default defineConfig({
       input: {
         index: "./index.html",
         live: "./live.html",
+        search: "./public/search.html",
+        player: "./public/player.html",
+        reaction: "./reaction.html",
         ...getMapsScripts(maps),
       },
     },
