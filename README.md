@@ -16,8 +16,8 @@ Fonctionnalitées développées :
 Clement YVARS
 GitHub : clement-Yvars - https://github.com/clement-Yvars
 Fonctionnalitées développées :
--
-
+- Création de la carte d'accueil du cinéma.
+- Intégration d'animations sonores et visuelles sur cette carte.
 
 Moussa Seydou TRAORE
 GitHub : MoussaST - https://github.com/MoussaST
